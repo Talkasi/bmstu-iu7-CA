@@ -57,6 +57,7 @@ diff_table_t newton_divided_difference(table_t &table)
 double newton(table_t &table, int n, double x)
 {
 	table_t new_table = get_nearest(table, n + 1, x);
+	printf("Part of the table to work with:\n");
 	print_table(new_table);
 
 	diff_table_t diff_table = newton_divided_difference(new_table);
