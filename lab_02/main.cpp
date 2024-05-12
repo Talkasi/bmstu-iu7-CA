@@ -5,6 +5,12 @@
 #include <iostream>
 #include <sciplot/sciplot.hpp>
 
+/* Quick test access */
+#define MAIN_DATA "data/lab_02_data.txt"
+#define QUADRATIC_DATA "data/quadratic.txt"
+#define SIN_DATA "data/sin.txt"
+#define TAN_DATA "data/tan.txt"
+
 using namespace sciplot;
 using namespace std;
 
@@ -18,7 +24,7 @@ Vec spline_vec(table_t &table, Vec x, double s_border, double e_border, bool ver
 
 int main()
 {
-    ifstream f = open_file("data/lab_02_data.txt");
+    ifstream f = open_file(QUADRATIC_DATA);
     table_t table = fread_table(f);
 
     cout << "Working table:" << endl;
@@ -52,7 +58,7 @@ int main()
     cout << "Y Spline with one border:  " << y_spline_newton1 << endl;
     cout << "Y Spline with two borders: " << y_spline_newton2 << endl;
 
-    Vec _x = linspace((const int)min_x, (const int)max_x, 200);
+    Vec _x = linspace(min_x, max_x, 200);
 
     Plot2D plot;
 
@@ -69,6 +75,14 @@ int main()
     plot.drawCurve(_x, spline_vec(table, _x, 0, 0, false)).label("Spline natural").lineWidth(2);
     plot.drawCurve(_x, spline_vec(table, _x, s_border, 0, false)).label("Spline with one border").lineWidth(2);
     plot.drawCurve(_x, spline_vec(table, _x, s_border, e_border, false)).label("Spline with two borders").lineWidth(2);
+
+    Vec x_points(x, 4);
+    Vec y_points(4);
+    y_points[0] = y_newton;
+    y_points[1] = y_spline_natural;
+    y_points[2] = y_spline_newton1;
+    y_points[3] = y_spline_newton2;
+    plot.drawPoints(x_points, y_points).label("Result points");
 
     Figure fig = {{plot}};
     Canvas canvas = {{fig}};
