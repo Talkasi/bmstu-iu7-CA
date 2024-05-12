@@ -10,6 +10,7 @@
 #define QUADRATIC_DATA "data/quadratic.txt"
 #define SIN_DATA "data/sin.txt"
 #define TAN_DATA "data/tan.txt"
+#define TMP_DATA "data/tmp.txt"
 
 using namespace sciplot;
 using namespace std;
@@ -24,7 +25,7 @@ Vec spline_vec(table_t &table, Vec x, double s_border, double e_border, bool ver
 
 int main()
 {
-    ifstream f = open_file(QUADRATIC_DATA);
+    ifstream f = open_file(MAIN_DATA);
     table_t table = fread_table(f);
 
     cout << "Working table:" << endl;
@@ -88,6 +89,7 @@ int main()
     Canvas canvas = {{fig}};
     canvas.size(1000, 700);
 
+    canvas.title("Lab_02");
     canvas.show();
 
     return 0;

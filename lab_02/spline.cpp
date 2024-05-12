@@ -23,8 +23,28 @@ double spline(table_t &table, double x, double s_border, double e_border, bool v
     init_spline_coef_d(data, e_border);
     assert(table.size() == data.d.size());
 
-    if (verbose)
+    if (verbose) {
+        printf("Coefficents using gauss method:\n");
         print_coeffs(data);
+    }
+
+    /* Showing that gauss was right */
+    init_spline_coef_a(data);
+    assert(table.size() == data.a.size());
+
+    init_spline_coef_c(data, s_border, e_border, verbose);
+    assert(table.size() == data.c.size());
+
+    init_spline_coef_b(data, e_border);
+    assert(table.size() == data.b.size());
+
+    init_spline_coef_d(data, e_border);
+    assert(table.size() == data.d.size());
+
+    if (verbose) {
+        printf("Coefficents using sweep method:\n");
+        print_coeffs(data);
+    }
 
     return spline_approximate(data, x);
 }
@@ -75,6 +95,53 @@ void init_spline_coef_c_gauss(spline_t &data, double s_border, double e_border, 
         print_matrix(lside, rside);
 
     data.c = gauss_elimination(lside, rside);
+}
+
+void init_spline_coef_c(spline_t &data, double s_border, double e_border, bool verbose)
+{
+    data.c.clear();
+
+    /* c_1 = 0 */
+    /* h_{i - 1} * c_{i - 1} + 2 * (h_{i - 1} + h_i) * c_i + h_i * c_{i + 1} =
+     * 3 * ((y_i - y_{i - 1}) / h_i - (y_{i - 1} - y_{i - 2}) / h_{i - 1}),     2 <= i <= N - 1 */
+    /* c_{N + 1} = 0 */
+
+    data.c.resize(data.table.size());
+    std::vector<double> ksi(data.table.size());
+    std::vector<double> eta(data.table.size());
+
+    ksi[1] = 0;
+    eta[1] = s_border / 2;
+    data.c[0] = s_border / 2;
+
+    int i = 2;
+    for (; i < data.table.size(); ++i) {
+        ksi[i] = get_ksi_next(data, i, ksi[i - 1]);
+        eta[i] = get_eta_next(data, i, ksi[i - 1], eta[i - 1]);
+    }
+
+    data.c[data.table.size() - 1] = e_border / 2;
+
+    for (int i = data.table.size() - 1; i > 0; --i)
+        data.c[i - 1] = eta[i] + data.c[i] * ksi[i];
+}
+
+double get_ksi_next(spline_t &data, int i, double ksi)
+{
+    double h_i_prev = data.table[i - 1][X] - data.table[i - 2][X];
+    double h_i = data.table[i][X] - data.table[i - 1][X];
+
+    return -h_i / (h_i_prev * ksi + 2 * (h_i_prev + h_i));
+}
+
+double get_eta_next(spline_t &data, int i, double ksi, double eta)
+{
+    double h_i_prev = data.table[i - 1][X] - data.table[i - 2][X];
+    double h_i = data.table[i][X] - data.table[i - 1][X];
+    double f_i = 3 * ((data.table[i][Y] - data.table[i - 1][Y]) / h_i -
+                      (data.table[i - 1][Y] - data.table[i - 2][Y]) / h_i_prev);
+
+    return (f_i - h_i_prev * eta) / (h_i_prev * ksi + 2 * (h_i_prev + h_i));
 }
 
 void init_spline_coef_d(spline_t &data, double e_border)
@@ -159,8 +226,8 @@ void init_rside_matrix(std::vector<double> &rside, const table_t &table, double 
     double h_i_prev;
     double h_i;
 
-    rside[0] = s_border;
-    rside[table.size() - 1] = e_border;
+    rside[0] = s_border / 2;
+    rside[table.size() - 1] = e_border / 2;
 
     for (int i = 2; i < table.size(); ++i) {
         h_i_prev = table[i - 1][X] - table[i - 2][X];

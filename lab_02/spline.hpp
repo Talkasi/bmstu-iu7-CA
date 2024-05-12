@@ -14,6 +14,9 @@ struct spline_t
 
 double spline(table_t &table, double x, double s_border, double e_border, bool verbose);
 
+double get_ksi_next(spline_t &data, int i, double ksi);
+double get_eta_next(spline_t &data, int i, double ksi, double eta);
+
 void init_spline_coef_a(spline_t &data);
 void init_spline_coef_b(spline_t &data, double e_border);
 void init_spline_coef_c(spline_t &data, double s_border, double e_border, bool verbose);
