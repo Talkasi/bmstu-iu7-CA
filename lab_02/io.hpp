@@ -1,7 +1,7 @@
 #ifndef IO_HPP
 #define IO_HPP
-#include <fstream>
 #include "table.h"
+#include <fstream>
 
 std::ifstream open_file(std::string path);
 table_t fread_table(std::ifstream &f);
