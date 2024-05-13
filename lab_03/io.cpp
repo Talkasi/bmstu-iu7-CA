@@ -1,4 +1,5 @@
 #include "io.hpp"
+#include <cassert>
 #include <iostream>
 
 #define CYAN "\033[0;36m"
@@ -135,4 +136,75 @@ void print_table(table_t &table)
     for (size_t i = 0; i < table.size(); ++i)
         printf("│ %17.6g │ %17.6g │\n", table[i][X], table[i][Y]);
     printf("└───────────────────┴───────────────────┘\n");
+}
+
+table_t get_nearest_y(table_3d_t &table, int n, double y)
+{
+    table_t tmp_table;
+    table_row_t tmp_row = {};
+    for (int i = 0; i < table.y.size(); ++i) {
+        tmp_row[X] = table.y[i];
+        tmp_row[Y] = i;
+        tmp_table.push_back(tmp_row);
+    }
+
+    return get_nearest(tmp_table, n, y);
+}
+
+table_t get_nearest(table_t &table, int n, double x)
+{
+    table_t res = {};
+    int middle_i = table.size();
+
+    for (int i = 0; i < table.size(); ++i) {
+        if (table[i][X] > x) {
+            middle_i = i;
+            break;
+        }
+    }
+
+    int li = middle_i - n / 2;
+    int ri = li + n - 1;
+
+    if (li < 0) {
+        li = 0;
+        ri = n - 1;
+    }
+    else if (ri >= table.size()) {
+        ri = table.size() - 1;
+        li = ri - n + 1;
+    }
+
+    for (; li <= ri; ++li)
+        res.push_back(table[li]);
+
+    return res;
+}
+
+table_t get_nearest_z(table_3d_t &table, int n, double z)
+{
+    table_t tmp_table;
+    table_row_t tmp_row = {};
+    for (int i = 0; i < table.z.size(); ++i) {
+        tmp_row[0] = table.z[i];
+        tmp_row[1] = i;
+        tmp_table.push_back(tmp_row);
+    }
+
+    return get_nearest(tmp_table, n, z);
+}
+
+table_t get_zx_from_y(table_3d_t &table, int y_i, int z_i)
+{
+    assert(table.z.size() == table.x.size());
+    table_t slice;
+    table_row_t tmp_row = {};
+
+    for (int i = 0; i < table.x.size(); ++i) {
+        tmp_row[0] = table.x[i];
+        tmp_row[1] = table.data[z_i][y_i][i];
+        slice.push_back(tmp_row);
+    }
+
+    return slice;
 }
